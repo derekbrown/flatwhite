@@ -13,8 +13,10 @@ GET     /users/createTest            controllers.Users.createTest()
 # Messages
 GET     /messages                    controllers.Messages.list()
 GET     /messages/:participant       controllers.Messages.findByParticipant(participant)
-GET     /createTest                  controllers.Messages.createTest()
-GET     /deleteTest                  controllers.Messages.deleteTest()
+
+# Test Endpoints
+GET     /test/create                 controllers.Messages.createTest()
+GET     /test/delete                 controllers.Messages.deleteTest()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
