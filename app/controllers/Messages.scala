@@ -29,7 +29,7 @@ object Messages extends Controller with MongoController{
       }
     }
 
-    def create(subject: String, sender: String, participants: Seq[Participant], message: String) = Action.async {
+    def create(subject: String, sender: String, participants: Seq[User], message: String) = Action.async {
       val pjson = Json.toJson(participants)
       val json = Json.obj(
         "subject" -> subject,
@@ -44,11 +44,11 @@ object Messages extends Controller with MongoController{
 
     def createTest = Action.async {
       val message = Message("Meeting Today About Project Bermuda", "GregCarter",Seq(
-          Participant("Kelly","Boyd","SunshineKelly"),
-          Participant("Gregory","Carter","GregCarter"),
-          Participant("Dylan","Gordon","DGordon134"),
-          Participant("Jeffrey","Mason","JeffreyMason"),
-          Participant("Gloria","Lawson","GloriaLawson")), "Blah blah blah")
+          User("Kelly","Boyd","SunshineKelly"),
+          User("Gregory","Carter","GregCarter"),
+          User("Dylan","Gordon","DGordon134"),
+          User("Jeffrey","Mason","JeffreyMason"),
+          User("Gloria","Lawson","GloriaLawson")), "Blah blah blah")
       val futureResult = collection.insert(message)
       futureResult.map(_=> Ok(message.toString))
     }
@@ -60,6 +60,11 @@ object Messages extends Controller with MongoController{
           Created
         }
       }.getOrElse(Future.successful(BadRequest("invalid json")))
+    }
+
+    def deleteTest = Action.async {
+      val futureResult = collection.remove(Json.obj("sender" -> "GregCarter"))
+      futureResult.map(_=> Ok(futureResult.toString))
     }
 
     def findByParticipant(participant: String) = Action.async {
@@ -74,7 +79,5 @@ object Messages extends Controller with MongoController{
         Ok(Json.toJson(messages))
       }
     }
-
-    def show(id: String) = Action { Ok(index.render("Your new application is ready.")) }
 
 }
