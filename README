@@ -1,4 +1,6 @@
-This is your new Play application
+=====================================
+--=========== FLATWHITE ===========--
 =====================================
 
-This file will be packaged with your application, when using `play dist`.
+MongoDB Server.
+Uses ReactiveMongo Play Plugin.
