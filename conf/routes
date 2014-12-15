@@ -9,6 +9,7 @@ GET     /                            controllers.Application.index()
 GET     /users                       controllers.Users.list()
 GET     /users/:username             controllers.Users.findByUsername(username)
 GET     /users/createTest            controllers.Users.createTest()
+POST    /signup                      controllers.Users.createUser()
 
 # Messages
 GET     /messages                    controllers.Messages.list()

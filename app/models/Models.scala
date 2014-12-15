@@ -3,7 +3,8 @@ package models
 case class User(
   firstname: String,
   lastname: String,
-  username: String
+  username: String,
+  email: String
 )
 
 case class Message(

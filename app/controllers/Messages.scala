@@ -44,11 +44,11 @@ object Messages extends Controller with MongoController{
 
     def createTest = Action.async {
       val message = Message("Meeting Today About Project Bermuda", "GregCarter",Seq(
-          User("Kelly","Boyd","SunshineKelly"),
-          User("Gregory","Carter","GregCarter"),
-          User("Dylan","Gordon","DGordon134"),
-          User("Jeffrey","Mason","JeffreyMason"),
-          User("Gloria","Lawson","GloriaLawson")), "Blah blah blah")
+          User("Kelly","Boyd","SunshineKelly","kelly@kelly.com"),
+          User("Gregory","Carter","GregCarter","greg@greg.com"),
+          User("Dylan","Gordon","DGordon134","dylan@dylan.com"),
+          User("Jeffrey","Mason","JeffreyMason","jeffrey@jeffrey.com"),
+          User("Gloria","Lawson","GloriaLawson","gloria@gloria.com")), "Blah blah blah")
       val futureResult = collection.insert(message)
       futureResult.map(_=> Ok(message.toString))
     }

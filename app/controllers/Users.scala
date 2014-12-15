@@ -5,6 +5,7 @@ import play.api.mvc._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.data.Form
+import play.api.data.Forms._
 import models._
 import models.JsonFormats._
 import scala.concurrent.Future
@@ -40,8 +41,19 @@ object Users extends Controller with MongoController{
       collection.insert(json).map(lastError => Ok("MongoDB Error: %s".format(lastError)))
     }
 
+    def createUser = Action.async {
+      val user = Form(mapping(
+          "firstname" -> text,
+          "lastname" -> text,
+          "username" -> text,
+          "email" -> text
+        )(User.apply)(User.unapply))
+      val futureResult = collection.insert(user.bindFromRequest.get)
+      futureResult.map(_=> Ok(user.toString))
+    }
+
     def createTest = Action.async {
-      val testuser = User("Kelly","Boyd","SunshineKelly")
+      val testuser = User("Kelly","Boyd","SunshineKelly","kelly@kelly.com")
       val futureResult = collection.insert(testuser)
       futureResult.map(_=> Ok(testuser.toString))
     }
