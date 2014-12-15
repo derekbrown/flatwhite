@@ -30,26 +30,16 @@ object Users extends Controller with MongoController{
       }
     }
 
-    def create(firstname: String, lastname: String, username: String) = Action.async {
+    def create(firstname: String, lastname: String, username: String, email: String) = Action.async {
       val json = Json.obj(
         "firstname" -> firstname,
         "lastname" -> lastname,
         "username" -> username,
+        "email" -> email,
         "created" -> new java.util.Date().getTime()
       )
 
       collection.insert(json).map(lastError => Ok("MongoDB Error: %s".format(lastError)))
-    }
-
-    def createUser = Action.async {
-      val user = Form(mapping(
-          "firstname" -> text,
-          "lastname" -> text,
-          "username" -> text,
-          "email" -> text
-        )(User.apply)(User.unapply))
-      val futureResult = collection.insert(user.bindFromRequest.get)
-      futureResult.map(_=> Ok(user.toString))
     }
 
     def createTest = Action.async {
