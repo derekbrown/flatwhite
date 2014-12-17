@@ -11,18 +11,17 @@ import scala.concurrent.Future
 import reactivemongo.api._
 import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection.JSONCollection
-import views.html._
 
 object Messages extends Controller with MongoController{
 
-    def collection: JSONCollection = db.collection[JSONCollection]("messages")
+    def collection = db.collection[JSONCollection]("messages")
 
     def list = Action.async {
       val cursor: Cursor [Message] = collection.find(Json.obj()).
         sort(Json.obj("created" -> -1)).
         cursor[Message]
 
-      val futureMessagesList: Future[List[Message]] = cursor.collect[List]()
+      val futureMessagesList = cursor.collect[List]()
 
       futureMessagesList.map { messages =>
         Ok(Json.toJson(messages))
@@ -73,7 +72,7 @@ object Messages extends Controller with MongoController{
         sort(Json.obj("created" -> -1)).
         cursor[Message]
 
-      val futureMessagesList: Future[List[Message]] = cursor.collect[List]()
+      val futureMessagesList = cursor.collect[List]()
 
       futureMessagesList.map { messages =>
         Ok(Json.toJson(messages))
