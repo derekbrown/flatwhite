@@ -6,17 +6,20 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.data.Form
 import models._
+import actions._
 import models.JsonFormats._
 import scala.concurrent.Future
 import reactivemongo.api._
 import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection.JSONCollection
+import reactivemongo.bson._
+import play.modules.reactivemongo.json.BSONFormats._
 
 object Messages extends Controller with MongoController{
 
     def collection = db.collection[JSONCollection]("messages")
 
-    def list = Action.async {
+    def list = WithCors("GET") {Action.async {
       val cursor: Cursor [Message] = collection.find(Json.obj()).
         sort(Json.obj("created" -> -1)).
         cursor[Message]
@@ -24,17 +27,17 @@ object Messages extends Controller with MongoController{
       val futureMessagesList = cursor.collect[List]()
 
       futureMessagesList.map { messages =>
-        Ok(Json.toJson(messages))
+        Ok(Json.toJson(Json.obj("messages" -> messages)))
       }
-    }
+    }}
 
-    def create(subject: String, sender: String, participants: Seq[User], message: String) = Action.async {
+    def create(subject: String, sender: String, participants: List[User], messageText: String) = Action.async {
       val pjson = Json.toJson(participants)
       val json = Json.obj(
         "subject" -> subject,
         "sender" -> sender,
         "participants" -> pjson,
-        "message" -> message,
+        "messageText" -> messageText,
         "created" -> new java.util.Date().getTime()
       )
 
@@ -42,12 +45,14 @@ object Messages extends Controller with MongoController{
     }
 
     def createTest = Action.async {
-      val message = Message("Meeting Today About Project Bermuda", "GregCarter",Seq(
-          User("Kelly","Boyd","SunshineKelly","kelly@kelly.com"),
-          User("Gregory","Carter","GregCarter","greg@greg.com"),
-          User("Dylan","Gordon","DGordon134","dylan@dylan.com"),
-          User("Jeffrey","Mason","JeffreyMason","jeffrey@jeffrey.com"),
-          User("Gloria","Lawson","GloriaLawson","gloria@gloria.com")), "Blah blah blah")
+      // Clean this crap up.
+      val user1id = BSONObjectID.generate.stringify
+      val user2id = BSONObjectID.generate.stringify
+      val user1 = User(user1id, "Kelly","Boyd","SunshineKelly","kelly@kelly.com")
+      val user2 = User(user2id, "Kelly","Boyd","SunshineKelly","kelly@kelly.com")
+      val futureU1Result = collection.insert(user1id)
+      val futureU2Result = collection.insert(user2id)
+      val message = Message(BSONObjectID.generate.stringify, "Meeting Today About Project Bermuda", "GregCarter",List(user1id, user2id), "Blah blah blah")
       val futureResult = collection.insert(message)
       futureResult.map(_=> Ok(message.toString))
     }
