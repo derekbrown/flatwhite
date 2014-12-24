@@ -7,7 +7,6 @@ import play.api.libs.json._
 import play.api.data.Form
 import play.api.data.Forms._
 import models._
-import models.JsonFormats._
 import scala.concurrent.Future
 import reactivemongo.api._
 import play.modules.reactivemongo.MongoController
@@ -33,7 +32,7 @@ object Users extends Controller with MongoController{
 
     def create(firstname: String, lastname: String, username: String, email: String) = Action.async {
       val json = Json.obj(
-        "id" -> BSONObjectID.generate.stringify,
+        "_id" -> BSONObjectID.generate,
         "firstname" -> firstname,
         "lastname" -> lastname,
         "username" -> username,
@@ -45,7 +44,7 @@ object Users extends Controller with MongoController{
     }
 
     def createTest = Action.async {
-      val testuser = User(BSONObjectID.generate.stringify, "Kelly","Boyd","SunshineKelly","kelly@kelly.com")
+      val testuser = User(BSONObjectID.generate, "Kelly","Boyd","SunshineKelly","kelly@kelly.com")
       val futureResult = collection.insert(testuser)
       futureResult.map(_=> Ok(testuser.toString))
     }
