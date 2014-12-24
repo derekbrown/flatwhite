@@ -30,10 +30,10 @@ object User {
     val base = Json.format[User]
     private val publicIdPath: JsPath = JsPath \ 'id
     private val privateIdPath: JsPath = JsPath \ '_id
-    private val privateWritePath: JsPath = JsPath \ '_id \ '$oid
+    private val privateWriteIDPath: JsPath = JsPath \ '_id \ '$oid
 
     def reads(json: JsValue): JsResult[User] = base.compose(copyKey(publicIdPath,privateIdPath)).reads(json)
-    def writes(o: User): JsValue = base.transform(moveKey(privateWritePath,publicIdPath)).writes(o)
+    def writes(o: User): JsValue = base.transform(moveKey(privateWriteIDPath,publicIdPath)).writes(o)
   }
   implicit val UserReads: Reads[User] = (
     (JsPath \ "id").read[BSONObjectID] and
@@ -66,9 +66,9 @@ object Message {
     val base = Json.format[Message]
     private val publicIdPath: JsPath = JsPath \ 'id
     private val privateIdPath: JsPath = JsPath \ '_id
-    private val privateWritePath: JsPath = JsPath \ '_id \ '$oid
+    private val privateWriteIDPath: JsPath = JsPath \ '_id \ '$oid
     def reads(json: JsValue): JsResult[Message] = base.compose(copyKey(publicIdPath,privateIdPath)).reads(json)
-    def writes(o: Message): JsValue = base.transform(moveKey(privateWritePath,publicIdPath)).writes(o)
+    def writes(o: Message): JsValue = base.transform(moveKey(privateWriteIDPath,publicIdPath)).writes(o)
   }
   implicit val messageReads: Reads[Message] = (
     (JsPath \ "id").read[BSONObjectID] and
