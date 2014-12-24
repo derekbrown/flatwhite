@@ -50,7 +50,7 @@ object Messages extends Controller with MongoController{
       val user2 = User(BSONObjectID.generate, "Kelly","Boyd","SunshineKelly","kelly@kelly.com")
       val futureU1Result = usersCollection.insert(user1)
       val futureU2Result = usersCollection.insert(user2)
-      val message = Message(BSONObjectID.generate, "Meeting Today About Project Bermuda", "GregCarter",Seq(user1._id, user2._id), "Blah blah blah")
+      val message = Message(BSONObjectID.generate, "Yet Another Meeting", "GregCarter",Seq(user1._id, user2._id), "Blah blah blah")
       val futureResult = messagesCollection.insert(message)
       futureResult.map(_=> Ok(message.toString))
     }
