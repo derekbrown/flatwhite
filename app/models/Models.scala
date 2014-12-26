@@ -14,6 +14,7 @@ object JsonExtensions {
   def copyKey(fromPath: JsPath,toPath:JsPath ) = __.json.update(toPath.json.copyFrom(fromPath.json.pick))
   def copyOptKey(fromPath: JsPath,toPath:JsPath ) = __.json.update(toPath.json.copyFrom(fromPath.json.pick orElse Reads.pure(JsNull)))
   def moveKey(fromPath:JsPath, toPath:JsPath) =(json:JsValue)=> json.transform(copyKey(fromPath,toPath) andThen fromPath.json.prune).get
+  def moveOID(fromPath:JsPath, toPath:JsPath) =(json:JsValue)=> json.transform(copyKey(fromPath,toPath) andThen fromPath.json.prune andThen (__ \ '_id).json.prune).get
 }
 
 case class User(
