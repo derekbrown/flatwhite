@@ -67,7 +67,6 @@ object Message {
     val base = Json.format[Message]
     private val publicIdPath: JsPath = JsPath \ 'id
     private val privateIdPath: JsPath = JsPath \ '_id
-    private val privateWriteIdPath: JsPath = JsPath \ '_id \ '$oid
     def reads(json: JsValue): JsResult[Message] = base.compose(copyKey(publicIdPath,privateIdPath)).reads(json)
     def writes(o: Message): JsValue = base.transform(moveKey(privateIdPath,publicIdPath)).writes(o)
   }
