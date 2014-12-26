@@ -25,10 +25,13 @@ object Messages extends Controller with MongoController{
         cursor[Message]
 
       val futureMessagesList = cursor.collect[List]()
-
       futureMessagesList.map { messages =>
-        Ok(Json.toJson(Json.obj("messages" -> messages)))
+        var messagesJson = Json.toJson(Json.obj("messages"->messages))
+        val jsonTransformer = __.json.update((__ \\ 'id).json.copyFrom( (__ \\ 'id \ '$oid).json.pick ))
+        val finalMessages = messagesJson.transform(jsonTransformer)
+        Ok(finalMessages.toString)
       }
+
     }}
 
     def create(subject: String, sender: String, participants: Seq[User], messageText: String) = Action.async {
