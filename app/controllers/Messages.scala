@@ -21,12 +21,11 @@ object Messages extends Controller with MongoController{
 
     def list = WithCors("GET") {Action.async {
       val cursor: Cursor [Message] = messagesCollection.find(Json.obj()).
-        sort(Json.obj("created" -> -1)).
+        sort(Json.obj("_id" -> -1)).
         cursor[Message]
 
       val futureMessagesList = cursor.collect[List]()
       futureMessagesList.map { messages =>
-
         var messagesJson = Json.toJson(Json.obj("messages" -> messages))
         Ok(messagesJson)
       }
@@ -52,7 +51,7 @@ object Messages extends Controller with MongoController{
       val user2 = User(BSONObjectID.generate, "Kelly","Boyd","SunshineKelly","kelly@kelly.com")
       val futureU1Result = usersCollection.insert(user1)
       val futureU2Result = usersCollection.insert(user2)
-      val message = Message(BSONObjectID.generate, "Yet Another Meeting", "GregCarter",Seq(user1._id, user2._id), "Blah blah blah")
+      val message = Message(BSONObjectID.generate, "Drinks After Work?", "SunshineKelly",Seq(user1._id, user2._id), "Blah blah blah")
       val futureResult = messagesCollection.insert(message)
       futureResult.map(_=> Ok(message.toString))
     }
