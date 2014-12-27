@@ -26,6 +26,7 @@ object Messages extends Controller with MongoController{
 
       val futureMessagesList = cursor.collect[List]()
       futureMessagesList.map { messages =>
+
         var messagesJson = Json.toJson(Json.obj("messages" -> messages))
         Ok(messagesJson)
       }
