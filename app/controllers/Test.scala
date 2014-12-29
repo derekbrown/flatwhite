@@ -34,16 +34,21 @@ object Test extends Controller with MongoController{
       ("Customer Feedback from JIRA-0402", "JIRA Ticket 0402 has the following feedback: Ennui sriracha Carles bespoke, trust fund synth retro McSweeney's Odd Future 8-bit hashtag. Pork belly typewriter Austin, sriracha brunch skateboard lo-fi cornhole 90's Pitchfork street art twee messenger bag Williamsburg mumblecore. Actually fashion axe drinking vinegar cronut keytar, narwhal bespoke. Godard literally fanny pack raw denim bicycle rights, scenester dreamcatcher Pitchfork kogi sartorial. Farm-to-table chia 90's craft beer Portland distillery, forage polaroid pickled Austin McSweeney's before they sold out synth. Salvia heirloom Blue Bottle cliche Truffaut Marfa. Hoodie pop-up health goth cornhole vinyl.")
     )
 
-    def createUsers(quantity: Int) = Action.async{
-      // TODO: Implement creation loop & randomization of data.
-      // This is currently broken (because of the last two lines -> loop to generate list of users works)
+    def createUsers(quantity: Int) = Action{
       val users: MutableList[User] = MutableList()
       for (x <- 1 to quantity) {
         val userToGenerate = Random.shuffle(testUsers.toList).head
         users += User(BSONObjectID.generate, userToGenerate("firstname"),userToGenerate("lastname"),userToGenerate("username"),userToGenerate("email"))
       }
-      // val futureUserResult = usersCollection.insert(BSONDocument(users.toString))
-      // futureUserResult.map(_=> Ok(futureUserResult.toString))
+      val futureUsersResult = users.map { user =>
+        val userJson = Json.toJson(user)
+        val futureUserResult = usersCollection.insert(userJson).map { lastError =>
+          Logger.debug(s"Successfully inserted with LastError: $lastError")
+          Created
+        }
+      }
+      Ok(Json.obj("users"->users))
+
     }
 
     def createMessages(quantity: Int) = Action.async {
