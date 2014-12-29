@@ -42,8 +42,8 @@ object Test extends Controller with MongoController{
         val userToGenerate = Random.shuffle(testUsers.toList).head
         users += User(BSONObjectID.generate, userToGenerate("firstname"),userToGenerate("lastname"),userToGenerate("username"),userToGenerate("email"))
       }
-      val futureUserResult = usersCollection.insert(Json.toJson(users))
-      futureUserResult.map(_=> Ok(futureUserResult.toString))
+      // val futureUserResult = usersCollection.insert(BSONDocument(users.toString))
+      // futureUserResult.map(_=> Ok(futureUserResult.toString))
     }
 
     def createMessages(quantity: Int) = Action.async {

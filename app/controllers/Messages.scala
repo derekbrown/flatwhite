@@ -46,15 +46,15 @@ object Messages extends Controller with MongoController{
 
     def create(subject: String, sender: String, participants: Seq[User], messageText: String) = Action.async {
       val pjson = Json.toJson(participants)
-      val json = Json.obj(
+      val bson = Json.obj(
+        "_id" -> BSONObjectID.generate,
         "subject" -> subject,
         "sender" -> sender,
         "participants" -> pjson,
-        "messageText" -> messageText,
-        "created" -> new java.util.Date().getTime()
+        "messageText" -> messageText
       )
 
-      messagesCollection.insert(json).map(lastError => Ok("MongoDB Error: %s".format(lastError)))
+      messagesCollection.insert(bson).map(lastError => Ok("MongoDB Error: %s".format(lastError)))
     }
 
     def createFromJson = Action.async(parse.json) { request =>
@@ -69,7 +69,7 @@ object Messages extends Controller with MongoController{
     def findByParticipant(participant: String) = Action.async {
       val cursor: Cursor [Message] = messagesCollection.
         find(Json.obj("participants.username" -> participant)).
-        sort(Json.obj("created" -> -1)).
+        sort(Json.obj("_id" -> -1)).
         cursor[Message]
 
       val futureMessagesList = cursor.collect[List]()
