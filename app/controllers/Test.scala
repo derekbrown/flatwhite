@@ -5,11 +5,13 @@ import play.api.mvc._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.data.Form
+import play.api.libs.ws.WS
 import models._
 import actions._
 import scala.util.Random
 import scala.collection.mutable.MutableList
-import scala.concurrent.Future
+import scala.concurrent._
+import scala.concurrent.duration._
 import reactivemongo.api._
 import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection.JSONCollection
@@ -22,19 +24,23 @@ object Test extends Controller with MongoController{
     def usersCollection = db.collection[JSONCollection]("users")
 
     // TODO: Can I make this test data cleaner by using my model classes instead of Maps?
-    val testUsers = List(
-      Map("firstname" -> "Kelly", "lastname" -> "Boyd", "username" -> "SunshineKelly", "email" -> "kelly@kelly.com"),
-      Map("firstname" -> "Gregory", "lastname" -> "Carter", "username" -> "GregCarter", "email" -> "greg@greg.com"),
-      Map("firstname" -> "Dylan", "lastname" -> "Gordon", "username" -> "DGordon134", "email" -> "dylan@dylan.com"),
-      Map("firstname" -> "Gloria", "lastname" -> "Lawson", "username" -> "GloriaLawson", "email" -> "gloria@gloria.com"),
-      Map("firstname" -> "Jeffrey", "lastname" -> "Mason", "username" -> "JeffreyMason", "email" -> "jeffrey@jeffrey.com")
-    )
-    val testMessages = List(
-      Map("subject" -> "Drinks After Work?", "messageText" -> "Drinks After Work? Fanny pack single-origin coffee pickled, stumptown Helvetica skateboard Intelligentsia Tumblr disrupt kitsch vegan Marfa four dollar toast. VHS High Life Shoreditch pug biodiesel, semiotics crucifix. Squid taxidermy quinoa yr, 90's crucifix tattooed bicycle rights irony mustache wayfarers Schlitz Vice Echo Park. Chambray church-key direct trade Intelligentsia Tumblr Bushwick. Tote bag hoodie pug pickled semiotics authentic squid YOLO. Vice organic keytar, PBR&B beard cold-pressed synth lo-fi gluten-free kogi. Leggings semiotics street art drinking vinegar next level banjo. Mixtape jean shorts +1 synth Bushwick, crucifix mustache kale chips Helvetica hoodie vinyl beard. Forage hella Thundercats, chambray wolf pug hashtag vegan fingerstache shabby chic locavore jean shorts literally. PBR cornhole messenger bag post-ironic narwhal Etsy. Migas Thundercats vinyl lo-fi, readymade actually ugh put a bird on it gastropub tilde beard typewriter cornhole. Post-ironic wolf disrupt next level, paleo Intelligentsia you probably haven't heard of them sriracha XOXO tilde High Life Etsy YOLO readymade. Brunch pour-over jean shorts, shabby chic you probably haven't heard of them 90's viral. YOLO fashion axe vegan, kale chips Helvetica heirloom readymade quinoa VHS squid sustainable cold-pressed whatever roof party."),
-      Map("subject" -> "Yesterday's Meeting?", "messageText" -> "Yesterday's meeting was hoodie fashion axe slow-carb pickled listicle, art party 90's occupy umami Wes Anderson church-key gluten-free chillwave. Quinoa leggings mumblecore, hella tofu Brooklyn tousled wolf bespoke vinyl locavore meggings food truck readymade Pitchfork. Artisan mixtape bicycle rights readymade mlkshk roof party, synth craft beer twee tofu you probably haven't heard of them sustainable cardigan small batch blog. Migas irony authentic, Intelligentsia Odd Future Kickstarter plaid forage Brooklyn Godard tattooed wolf Wes Anderson Etsy. Carles Portland try-hard, keytar Pitchfork squid 90's XOXO. Normcore iPhone flexitarian meditation, Shoreditch Marfa Pinterest chia plaid selfies brunch. Craft beer next level organic, fashion axe meditation Vice Banksy Carles distillery gluten-free keytar sustainable PBR&B fanny pack. IPhone sartorial taxidermy, American Apparel sustainable authentic shabby chic tofu food truck Thundercats Bushwick. Sriracha keytar flannel, pickled Neutra letterpress sartorial lumbersexual four loko Odd Future. Migas pug aesthetic Etsy occupy keytar meh crucifix. Fixie cray jean shorts, ethical synth put a bird on it distillery pickled tousled cliche sriracha bicycle rights. Wes Anderson fixie lumbersexual art party Intelligentsia, street art semiotics meggings hella photo booth Austin master cleanse PBR&B raw denim. Pitchfork Etsy heirloom flexitarian. Hoodie taxidermy salvia, irony sriracha Portland church-key Brooklyn cold-pressed retro organic."),
-      Map("subject" -> "Next Week's Sprint", "messageText" -> "Next week's sprint will be umami cred listicle disrupt, viral skateboard Marfa. DIY Intelligentsia Brooklyn quinoa, artisan pop-up fixie Truffaut try-hard health goth. Hella mumblecore Shoreditch Echo Park blog 8-bit tilde, gluten-free sustainable migas. Quinoa Vice Helvetica, messenger bag DIY umami 90's. Brunch freegan food truck kitsch art party. Flannel Echo Park Neutra distillery mixtape polaroid. Vinyl tote bag heirloom, church-key keffiyeh Pitchfork scenester post-ironic meh selfies Thundercats."),
-      Map("subject" -> "Customer Feedback from JIRA-0402", "messageText" -> "JIRA Ticket 0402 has the following feedback: Ennui sriracha Carles bespoke, trust fund synth retro McSweeney's Odd Future 8-bit hashtag. Pork belly typewriter Austin, sriracha brunch skateboard lo-fi cornhole 90's Pitchfork street art twee messenger bag Williamsburg mumblecore. Actually fashion axe drinking vinegar cronut keytar, narwhal bespoke. Godard literally fanny pack raw denim bicycle rights, scenester dreamcatcher Pitchfork kogi sartorial. Farm-to-table chia 90's craft beer Portland distillery, forage polaroid pickled Austin McSweeney's before they sold out synth. Salvia heirloom Blue Bottle cliche Truffaut Marfa. Hoodie pop-up health goth cornhole vinyl.")
-    )
+    // TODO: Also, is there a service I can use in place of hard-coded data?
+    //       - Messages & subjects done.
+    //       - Need to find a service to generate random names, usernames, emails.
+
+    def generateRandomMessage(paragraphs: Int = 2): String = {
+      val futureMessage =  WS.url("http://hipsterjesus.com/api/?type=hipster-centric&html=false&paras=" + paragraphs.toString).get().map {response =>
+        (response.json \ "text").toString.replace("\"","")
+      }
+      return Await.result(futureMessage, 1000 milliseconds)
+    }
+
+    def generateRandomSubject(words: Int = 3): String = {
+      val futureMessage =  WS.url("http://hipsterjesus.com/api/?type=hipster-centric&html=false&paras=1").get().map {response =>
+        (response.json \ "text").toString.replace("\"","").replace(",", "").replace("&amp;","").split(" ").take(words).mkString(" ")
+      }
+      return Await.result(futureMessage, 1000 milliseconds)
+    }
 
     def createUsers(quantity: Int) = Action {
       val users: MutableList[User] = MutableList()
@@ -62,7 +68,9 @@ object Test extends Controller with MongoController{
       val messages: MutableList[Message] = MutableList()
       for (x <- 1 to quantity) {
         val messageToGenerate = Random.shuffle(testMessages.toList).head
-        messages += Message(BSONObjectID.generate, messageToGenerate("subject"), user1.userName, Seq(user1._id), messageToGenerate("messageText"))
+        val randomSubject = generateRandomSubject(Random.nextInt(7)+1)
+        val randomMessage = randomSubject + " " + generateRandomMessage(Random.nextInt(3)+1)
+        messages += Message(BSONObjectID.generate, randomSubject, user1.userName, Seq(user1._id), randomMessage)
       }
       val futureMessageResult = messages.map { message =>
         val messageJson = Json.toJson(message)
