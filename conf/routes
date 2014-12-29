@@ -3,20 +3,22 @@
 # ~~~~
 
 # Home page
-GET     /                            controllers.Application.index()
+GET     /                                     controllers.Application.index()
 
 # Users
-GET     /users                       controllers.Users.list()
-GET     /users/:username             controllers.Users.findByUsername(username)
-GET     /users/createTest            controllers.Users.createTest()
+GET     /users                                controllers.Users.list()
+GET     /users/:username                      controllers.Users.findByUsername(username)
 
 # Messages
-GET     /messages                    controllers.Messages.list()
-GET     /messages/:participant       controllers.Messages.findByParticipant(participant)
+GET     /messages                             controllers.Messages.list()
+GET     /messages/from/:sender                controllers.Messages.findBySender(sender)
+GET     /messages/with/:participant           controllers.Messages.findByParticipant(participant)
 
-# Test Endpoints
-GET     /test/create                 controllers.Messages.createTest()
-GET     /test/delete                 controllers.Messages.deleteTest()
+# Managing Test Data
+GET     /test/create/users/:quantity          controllers.Test.createUsers(quantity: Int)
+GET     /test/create/messages/:quantity       controllers.Test.createMessages(quantity: Int)
+GET     /test/delete/users                    controllers.Test.deleteTestUsers()
+GET     /test/delete/messages                 controllers.Test.deleteTestMessages()
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET     /assets/*file                         controllers.Assets.at(path="/public", file)

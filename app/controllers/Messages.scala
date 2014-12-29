@@ -32,6 +32,18 @@ object Messages extends Controller with MongoController{
 
     }}
 
+    def findBySender(sender: String) = WithCors("GET") {Action.async {
+      val cursor: Cursor [Message] = messagesCollection.find(BSONDocument("sender" -> sender)).
+        sort(Json.obj("_id" -> -1)).
+        cursor[Message]
+
+      val futureMessagesList = cursor.collect[List]()
+      futureMessagesList.map { messages =>
+        var messagesJson = Json.toJson(Json.obj("messages" -> messages))
+        Ok(messagesJson)
+      }
+    }}
+
     def create(subject: String, sender: String, participants: Seq[User], messageText: String) = Action.async {
       val pjson = Json.toJson(participants)
       val json = Json.obj(
@@ -45,17 +57,6 @@ object Messages extends Controller with MongoController{
       messagesCollection.insert(json).map(lastError => Ok("MongoDB Error: %s".format(lastError)))
     }
 
-    def createTest = Action.async {
-      // Clean this crap up.
-      val user1 = User(BSONObjectID.generate, "Kelly","Boyd","SunshineKelly","kelly@kelly.com")
-      val user2 = User(BSONObjectID.generate, "Kelly","Boyd","SunshineKelly","kelly@kelly.com")
-      val futureU1Result = usersCollection.insert(user1)
-      val futureU2Result = usersCollection.insert(user2)
-      val message = Message(BSONObjectID.generate, "Drinks After Work?", "SunshineKelly",Seq(user1._id, user2._id), "Blah blah blah")
-      val futureResult = messagesCollection.insert(message)
-      futureResult.map(_=> Ok(message.toString))
-    }
-
     def createFromJson = Action.async(parse.json) { request =>
         request.body.validate[Message].map { message =>
         messagesCollection.insert(message).map { lastError =>
@@ -63,11 +64,6 @@ object Messages extends Controller with MongoController{
           Created
         }
       }.getOrElse(Future.successful(BadRequest("invalid json")))
-    }
-
-    def deleteTest = Action.async {
-      val futureResult = messagesCollection.remove(Json.obj("sender" -> "GregCarter"))
-      futureResult.map(_=> Ok(futureResult.toString))
     }
 
     def findByParticipant(participant: String) = Action.async {
