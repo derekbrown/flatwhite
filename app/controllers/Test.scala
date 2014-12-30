@@ -69,7 +69,7 @@ object Test extends Controller with MongoController{
     }
 
     def createMessages(quantity: Int) = Action {
-      // TODO: Implement randomization of users attached to messages as sender & participants.
+      // TODO: Implement randomization of users attached to messages as sender & participants. Get random IDs & usernames from DB.
       val user1 = User(BSONObjectID.generate, "Kelly","Boyd","SunshineKelly","kelly@kelly.com")
       val futureUserResult = usersCollection.insert(user1)
       futureUserResult.map(_=> Ok(futureUserResult.toString))
