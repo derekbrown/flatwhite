@@ -18,6 +18,7 @@ import reactivemongo.api._
 import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection.JSONCollection
 import reactivemongo.bson._
+import reactivemongo.core.commands._
 import play.modules.reactivemongo.json.BSONFormats._
 
 object Test extends Controller with MongoController{
@@ -50,6 +51,22 @@ object Test extends Controller with MongoController{
         (response.json \\ "user")
       }
       return Await.result(futureUserSet, 1500 milliseconds).asInstanceOf[List[JsObject]]
+    }
+
+    def getRandomUser(): Future[Option[User]] = {
+      val futureCount = db.command(Count(usersCollection.name))
+      futureCount.flatMap { count =>
+        val skip = Random.nextInt(count)
+        usersCollection.find(BSONDocument()).options(QueryOpts(skipN = skip)).one[User]
+      }
+    }
+
+    def getRandomUserID(): String = {
+      return String(2)
+    }
+
+    def getRandomUsername(): String = {
+      return String(2)
     }
 
     def createUsers(quantity: Int) = Action {
