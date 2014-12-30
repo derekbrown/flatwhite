@@ -28,7 +28,7 @@ object Test extends Controller with MongoController{
     // TODO: Can I make this test data cleaner by using my model classes instead of Maps?
     // TODO: Also, is there a service I can use in place of hard-coded data?
     //       - Messages & subjects done.
-    //       - Need to implement randomuser.me data. Also examine Mockaroo.
+    //       - Need to implement randomuser.me data.
 
     def generateRandomMessage(paragraphs: Int = 2): String = {
       val futureMessage =  WS.url("http://hipsterjesus.com/api/?type=hipster-centric&html=false&paras=" + paragraphs.toString).get().map {response =>
@@ -44,33 +44,33 @@ object Test extends Controller with MongoController{
       return Await.result(futureMessage, 1500 milliseconds)
     }
 
-    def generateRandomUserData(users: Int = 1) = Action{
+    def generateRandomUserData(users: Int = 1): List[JsObject] = {
       // TODO: Finagle this data into usable user data or create user objects
-      val futureUser =  WS.url("http://api.randomuser.me/?results=" + users).get().map {response =>
-        (response.json)
+      val userSet =  WS.url("http://api.randomuser.me/?results=" + users).get()
+      val futureUserSet = userSet.map { response =>
+        (response.json \\ "user")
       }
-      Ok(Await.result(futureUser, 1500 milliseconds))
+      return Await.result(futureUserSet, 1500 milliseconds).asInstanceOf[List[JsObject]]
     }
 
     def createUsers(quantity: Int) = Action {
-      val users: MutableList[User] = MutableList()
-      // for (x <- 1 to quantity) {
-      //   val userToGenerate = generateRandomUserData()
-      //   users += User(BSONObjectID.generate, userToGenerate.name.first,userToGenerate.name.last,userToGenerate.username,userToGenerate.email)
-      // }
-      val futureUsersResult = users.map { user =>
+      val userToGenerate = generateRandomUserData(quantity)
+      val usersList = userToGenerate.map { user =>
+        val userJson = Json.toJson(user)
+        User(BSONObjectID.generate, (userJson \\ "first")(0).toString.replace("\"",""), (userJson \\ "last")(0).toString.replace("\"",""), (userJson \\ "username")(0).toString.replace("\"",""), (userJson \\ "email")(0).toString.replace("\"",""))
+      }
+      val futureUsersResult = usersList.map { user =>
         val userJson = Json.toJson(user)
         val futureUserResult = usersCollection.insert(userJson).map { lastError =>
           Logger.debug(s"Successfully inserted with LastError: $lastError")
           Created
         }
       }
-      Ok(Json.obj("users" -> users))
-
+      Ok(Json.obj("users" -> usersList))
     }
 
     def createMessages(quantity: Int) = Action {
-      // TODO: Implement randomization of users attached to messages as sender & participants. Need getRandomUsername and getRandomUserID functions.
+      // TODO: Implement randomization of users attached to messages as sender & participants.
       val user1 = User(BSONObjectID.generate, "Kelly","Boyd","SunshineKelly","kelly@kelly.com")
       val futureUserResult = usersCollection.insert(user1)
       futureUserResult.map(_=> Ok(futureUserResult.toString))

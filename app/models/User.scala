@@ -13,6 +13,6 @@ case class User(
 )
 
 object User {
-  implicit val userJSONReads = Json.reads[User]
+  implicit val userJSONReads = __.json.update((__ \ 'id).json.copyFrom((__ \ '_id \ '$oid).json.pick[JsString] )) andThen Json.reads[User]
   implicit val userJSONWrites = Json.writes[User]
 }

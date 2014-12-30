@@ -7,6 +7,7 @@ import play.api.libs.json._
 import play.api.data.Form
 import play.api.data.Forms._
 import models._
+import actions._
 import scala.concurrent.Future
 import reactivemongo.api._
 import play.modules.reactivemongo.MongoController
@@ -18,17 +19,18 @@ object Users extends Controller with MongoController{
 
     def collection = db.collection[JSONCollection]("users")
 
-    def list = Action.async {
+ def list = WithCors("GET") {Action.async {
       val cursor: Cursor [User] = collection.find(Json.obj()).
-        sort(Json.obj("created" -> -1)).
+        sort(Json.obj("_id" -> -1)).
         cursor[User]
 
-      val futureUsersList = cursor.collect[List]()
-
-      futureUsersList.map { users =>
-        Ok(Json.toJson(users))
+      val futureUserList = cursor.collect[List]()
+      futureUserList.map { users =>
+        var usersJson = Json.toJson(Json.obj("users" -> users))
+        Ok(usersJson)
       }
-    }
+
+    }}
 
     def create(firstname: String, lastname: String, username: String, email: String) = Action.async {
       val json = Json.obj(
