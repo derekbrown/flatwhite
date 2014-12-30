@@ -57,16 +57,17 @@ object Test extends Controller with MongoController{
       val futureCount = db.command(Count(usersCollection.name))
       futureCount.flatMap { count =>
         val skip = Random.nextInt(count)
-        usersCollection.find(BSONDocument()).options(QueryOpts(skipN = skip)).one[User]
+        return usersCollection.find(BSONDocument()).options(QueryOpts(skipN = skip)).one[User]
       }
     }
 
     def getRandomUserID(): String = {
-      return String(2)
+      val rando = getRandomUser()
+      return rando.id
     }
 
     def getRandomUsername(): String = {
-      return String(2)
+      return ""
     }
 
     def createUsers(quantity: Int) = Action {
@@ -95,7 +96,7 @@ object Test extends Controller with MongoController{
       for (x <- 1 to quantity) {
         val randomSubject = generateRandomSubject(Random.nextInt(7)+1)
         val randomMessage = randomSubject + " " + generateRandomMessage(Random.nextInt(3)+1)
-        messages += Message(BSONObjectID.generate, randomSubject, user1.userName, Seq(user1._id), randomMessage)
+        messages += Message(BSONObjectID.generate, randomSubject, user1.userName, Seq(getRandomUserID()), randomMessage)
       }
       val futureMessageResult = messages.map { message =>
         val messageJson = Json.toJson(message)
