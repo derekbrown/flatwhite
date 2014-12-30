@@ -45,7 +45,6 @@ object Test extends Controller with MongoController{
     }
 
     def generateRandomUserData(users: Int = 1): List[JsObject] = {
-      // TODO: Finagle this data into usable user data or create user objects
       val userSet =  WS.url("http://api.randomuser.me/?results=" + users).get()
       val futureUserSet = userSet.map { response =>
         (response.json \\ "user")
@@ -54,8 +53,8 @@ object Test extends Controller with MongoController{
     }
 
     def createUsers(quantity: Int) = Action {
-      val userToGenerate = generateRandomUserData(quantity)
-      val usersList = userToGenerate.map { user =>
+      val usersToGenerate = generateRandomUserData(quantity)
+      val usersList = usersToGenerate.map { user =>
         val userJson = Json.toJson(user)
         User(BSONObjectID.generate, (userJson \\ "first")(0).toString.replace("\"",""), (userJson \\ "last")(0).toString.replace("\"",""), (userJson \\ "username")(0).toString.replace("\"",""), (userJson \\ "email")(0).toString.replace("\"",""))
       }
