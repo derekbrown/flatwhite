@@ -17,6 +17,7 @@ GET     /messages/with/:participant           controllers.Messages.findByPartici
 # Managing Test Data
 GET     /test/create/users/:quantity          controllers.Test.createUsers(quantity: Int)
 GET     /test/create/messages/:quantity       controllers.Test.createMessages(quantity: Int)
+GET     /test/random/users/:quantity          controllers.Test.generateRandomUserData(quantity: Int)
 GET     /test/delete/users                    controllers.Test.deleteTestUsers()
 GET     /test/delete/messages                 controllers.Test.deleteTestMessages()
 

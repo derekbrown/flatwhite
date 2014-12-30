@@ -4,8 +4,10 @@ import play.api._
 import play.api.mvc._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
+import play.api.libs.json.Reads._
 import play.api.data.Form
 import play.api.libs.ws.WS
+import play.api.libs.functional.syntax._
 import models._
 import actions._
 import scala.util.Random
@@ -26,28 +28,36 @@ object Test extends Controller with MongoController{
     // TODO: Can I make this test data cleaner by using my model classes instead of Maps?
     // TODO: Also, is there a service I can use in place of hard-coded data?
     //       - Messages & subjects done.
-    //       - Need to find a service to generate random names, usernames, emails.
+    //       - Need to implement randomuser.me data. Also examine Mockaroo.
 
     def generateRandomMessage(paragraphs: Int = 2): String = {
       val futureMessage =  WS.url("http://hipsterjesus.com/api/?type=hipster-centric&html=false&paras=" + paragraphs.toString).get().map {response =>
         (response.json \ "text").toString.replace("\"","")
       }
-      return Await.result(futureMessage, 1000 milliseconds)
+      return Await.result(futureMessage, 1500 milliseconds)
     }
 
     def generateRandomSubject(words: Int = 3): String = {
       val futureMessage =  WS.url("http://hipsterjesus.com/api/?type=hipster-centric&html=false&paras=1").get().map {response =>
         (response.json \ "text").toString.replace("\"","").replace(",", "").replace("&amp;","").split(" ").take(words).mkString(" ")
       }
-      return Await.result(futureMessage, 1000 milliseconds)
+      return Await.result(futureMessage, 1500 milliseconds)
+    }
+
+    def generateRandomUserData(users: Int = 1) = Action{
+      // TODO: Finagle this data into usable user data or create user objects
+      val futureUser =  WS.url("http://api.randomuser.me/?results=" + users).get().map {response =>
+        (response.json)
+      }
+      Ok(Await.result(futureUser, 1500 milliseconds))
     }
 
     def createUsers(quantity: Int) = Action {
       val users: MutableList[User] = MutableList()
-      for (x <- 1 to quantity) {
-        val userToGenerate = Random.shuffle(testUsers.toList).head
-        users += User(BSONObjectID.generate, userToGenerate("firstname"),userToGenerate("lastname"),userToGenerate("username"),userToGenerate("email"))
-      }
+      // for (x <- 1 to quantity) {
+      //   val userToGenerate = generateRandomUserData()
+      //   users += User(BSONObjectID.generate, userToGenerate.name.first,userToGenerate.name.last,userToGenerate.username,userToGenerate.email)
+      // }
       val futureUsersResult = users.map { user =>
         val userJson = Json.toJson(user)
         val futureUserResult = usersCollection.insert(userJson).map { lastError =>
@@ -67,7 +77,6 @@ object Test extends Controller with MongoController{
 
       val messages: MutableList[Message] = MutableList()
       for (x <- 1 to quantity) {
-        val messageToGenerate = Random.shuffle(testMessages.toList).head
         val randomSubject = generateRandomSubject(Random.nextInt(7)+1)
         val randomMessage = randomSubject + " " + generateRandomMessage(Random.nextInt(3)+1)
         messages += Message(BSONObjectID.generate, randomSubject, user1.userName, Seq(user1._id), randomMessage)
