@@ -19,6 +19,7 @@ GET     /test/create/users/:quantity          controllers.Test.createUsers(quant
 GET     /test/create/messages/:quantity       controllers.Test.createMessages(quantity: Int)
 GET     /test/delete/users                    controllers.Test.deleteTestUsers()
 GET     /test/delete/messages                 controllers.Test.deleteTestMessages()
+GET     /test/randomid                        controllers.Test.getRandomUserID()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                         controllers.Assets.at(path="/public", file)

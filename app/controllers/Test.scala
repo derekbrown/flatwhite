@@ -10,7 +10,7 @@ import play.api.libs.ws.WS
 import play.api.libs.functional.syntax._
 import models._
 import actions._
-import scala.util.Random
+import scala.util.{Random, Success, Failure}
 import scala.collection.mutable.MutableList
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -61,9 +61,10 @@ object Test extends Controller with MongoController{
       }
     }
 
-    def getRandomUserID(): String = {
-      val rando = getRandomUser()
-      return rando.id
+    def getRandomUserID() = Action {
+      // TODO: Figure out why does this take so long?
+      val rando = Await.result(getRandomUser(), 10 seconds)
+      Ok(rando.toString)
     }
 
     def getRandomUsername(): String = {
@@ -96,7 +97,7 @@ object Test extends Controller with MongoController{
       for (x <- 1 to quantity) {
         val randomSubject = generateRandomSubject(Random.nextInt(7)+1)
         val randomMessage = randomSubject + " " + generateRandomMessage(Random.nextInt(3)+1)
-        messages += Message(BSONObjectID.generate, randomSubject, user1.userName, Seq(getRandomUserID()), randomMessage)
+        messages += Message(BSONObjectID.generate, randomSubject, user1.userName, Seq(user1._id), randomMessage)
       }
       val futureMessageResult = messages.map { message =>
         val messageJson = Json.toJson(message)
