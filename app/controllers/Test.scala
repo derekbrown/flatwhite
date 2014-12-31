@@ -61,13 +61,16 @@ object Test extends Controller with MongoController{
       }
     }
 
-    def getRandomUserID() = Action {
-      val rando = Await.result(getRandomUser(), 10 seconds)
-      Ok(rando.toString)
+    def getRandomUserID(): BSONObjectID = {
+      val rando = Await.result(getRandomUser(), 2500 milliseconds)
+      val randomUser = rando.get
+      return randomUser._id
     }
 
     def getRandomUsername(): String = {
-      return ""
+      val rando = Await.result(getRandomUser(), 2500 milliseconds)
+      val randomUser = rando.get
+      return randomUser.userName
     }
 
     def createUsers(quantity: Int) = Action {
@@ -88,15 +91,11 @@ object Test extends Controller with MongoController{
 
     def createMessages(quantity: Int) = Action {
       // TODO: Implement randomization of users attached to messages as sender & participants. Get random IDs & usernames from DB.
-      val user1 = User(BSONObjectID.generate, "Kelly","Boyd","SunshineKelly","kelly@kelly.com")
-      val futureUserResult = usersCollection.insert(user1)
-      futureUserResult.map(_=> Ok(futureUserResult.toString))
-
       val messages: MutableList[Message] = MutableList()
       for (x <- 1 to quantity) {
         val randomSubject = generateRandomSubject(Random.nextInt(7)+1)
         val randomMessage = randomSubject + " " + generateRandomMessage(Random.nextInt(3)+1)
-        messages += Message(BSONObjectID.generate, randomSubject, user1.userName, Seq(user1._id), randomMessage)
+        messages += Message(BSONObjectID.generate, randomSubject, getRandomUsername(), Seq(getRandomUserID(), getRandomUserID()), randomMessage)
       }
       val futureMessageResult = messages.map { message =>
         val messageJson = Json.toJson(message)
