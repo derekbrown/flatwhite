@@ -26,11 +26,6 @@ object Test extends Controller with MongoController{
     def messagesCollection = db.collection[JSONCollection]("messages")
     def usersCollection = db.collection[JSONCollection]("users")
 
-    // TODO: Can I make this test data cleaner by using my model classes instead of Maps?
-    // TODO: Also, is there a service I can use in place of hard-coded data?
-    //       - Messages & subjects done.
-    //       - Need to implement randomuser.me data.
-
     def generateRandomMessage(paragraphs: Int = 2): String = {
       val futureMessage =  WS.url("http://hipsterjesus.com/api/?type=hipster-centric&html=false&paras=" + paragraphs.toString).get().map {response =>
         (response.json \ "text").toString.replace("\"","")
@@ -90,7 +85,6 @@ object Test extends Controller with MongoController{
     }
 
     def createMessages(quantity: Int) = Action {
-      // TODO: Implement randomization of users attached to messages as sender & participants. Get random IDs & usernames from DB.
       val messages: MutableList[Message] = MutableList()
       for (x <- 1 to quantity) {
         val randomSubject = generateRandomSubject(Random.nextInt(7)+1)
