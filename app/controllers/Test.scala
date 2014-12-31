@@ -10,7 +10,7 @@ import play.api.libs.ws.WS
 import play.api.libs.functional.syntax._
 import models._
 import actions._
-import scala.util.{Random, Success, Failure}
+import scala.util.{Random}
 import scala.collection.mutable.MutableList
 import scala.concurrent._
 import scala.concurrent.duration._
