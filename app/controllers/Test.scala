@@ -55,14 +55,13 @@ object Test extends Controller with MongoController{
 
     def getRandomUser(): Future[Option[User]] = {
       val futureCount = db.command(Count(usersCollection.name))
-      futureCount.flatMap { count =>
+      return futureCount.flatMap { count =>
         val skip = Random.nextInt(count)
-        return usersCollection.find(BSONDocument()).options(QueryOpts(skipN = skip)).one[User]
+        usersCollection.find(BSONDocument()).options(QueryOpts(skipN = skip)).one[User]
       }
     }
 
     def getRandomUserID() = Action {
-      // TODO: Figure out why does this take so long?
       val rando = Await.result(getRandomUser(), 10 seconds)
       Ok(rando.toString)
     }
