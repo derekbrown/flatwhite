@@ -12,6 +12,8 @@ GET     /users/:username                      controllers.Users.findByUsername(u
 # Messages
 GET     /messages                             controllers.Messages.list()
 POST    /messages                             controllers.Messages.send()
+
+# Convert the following (or add additional routes?) to traditional GET request routes
 GET     /messages/from/:sender                controllers.Messages.getBySender(sender)
 GET     /messages/with/:participant           controllers.Messages.getByParticipant(participant)
 
