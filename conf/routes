@@ -11,8 +11,9 @@ GET     /users/:username                      controllers.Users.findByUsername(u
 
 # Messages
 GET     /messages                             controllers.Messages.list()
-GET     /messages/from/:sender                controllers.Messages.findBySender(sender)
-GET     /messages/with/:participant           controllers.Messages.findByParticipant(participant)
+POST    /messages                             controllers.Messages.send()
+GET     /messages/from/:sender                controllers.Messages.getBySender(sender)
+GET     /messages/with/:participant           controllers.Messages.getByParticipant(participant)
 
 # Managing Test Data
 GET     /test/create/users/:quantity          controllers.Test.createUsers(quantity: Int)

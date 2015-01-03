@@ -32,8 +32,8 @@ object Messages extends Controller with MongoController{
 
     }}
 
-    def findBySender(sender: String) = WithCors("GET") {Action.async {
-      val cursor: Cursor [Message] = messagesCollection.find(BSONDocument("sender" -> sender)).
+    def getBySender(sender: String) = WithCors("GET") {Action.async {
+      val cursor: Cursor [Message] = messagesCollection.find(BSONDocument("sender.userName" -> sender)).
         sort(Json.obj("_id" -> -1)).
         cursor[Message]
 
@@ -44,7 +44,23 @@ object Messages extends Controller with MongoController{
       }
     }}
 
-    def create(subject: String, sender: String, participants: Seq[User], messageText: String) = Action.async {
+    def getByParticipant(participant: String) = Action.async {
+      val cursor: Cursor [Message] = messagesCollection.find(BSONDocument("participants.userName" -> participant)).
+        sort(Json.obj("_id" -> -1)).
+        cursor[Message]
+
+      val futureMessagesList = cursor.collect[List]()
+      futureMessagesList.map { messages =>
+        var messagesJson = Json.toJson(Json.obj("messages" -> messages))
+        Ok(messagesJson)
+      }
+    }
+
+    def send = WithCors("POST") { Action {
+      Ok("Nothing works yet.")
+    }}
+
+    def create(subject: String, sender: User, participants: Seq[User], messageText: String) = Action.async {
       val pjson = Json.toJson(participants)
       val bson = Json.obj(
         "_id" -> BSONObjectID.generate,
@@ -56,7 +72,6 @@ object Messages extends Controller with MongoController{
 
       messagesCollection.insert(bson).map(lastError => Ok("MongoDB Error: %s".format(lastError)))
     }
-
     def createFromJson = Action.async(parse.json) { request =>
         request.body.validate[Message].map { message =>
         messagesCollection.insert(message).map { lastError =>
@@ -65,18 +80,4 @@ object Messages extends Controller with MongoController{
         }
       }.getOrElse(Future.successful(BadRequest("invalid json")))
     }
-
-    def findByParticipant(participant: String) = Action.async {
-      val cursor: Cursor [Message] = messagesCollection.
-        find(Json.obj("participants.username" -> participant)).
-        sort(Json.obj("_id" -> -1)).
-        cursor[Message]
-
-      val futureMessagesList = cursor.collect[List]()
-
-      futureMessagesList.map { messages =>
-        Ok(Json.toJson(messages))
-      }
-    }
-
 }

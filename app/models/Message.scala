@@ -6,8 +6,8 @@ import play.modules.reactivemongo.json.BSONFormats._
 case class Message(
   _id: BSONObjectID = BSONObjectID.generate,
   subject: String,
-  sender: String,
-  participants: Seq[BSONObjectID],
+  sender: User,
+  participants: Seq[User],
   messageText: String,
   id: Option[String] = None
 )

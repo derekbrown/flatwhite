@@ -45,7 +45,7 @@ object Test extends Controller with MongoController{
       val futureUserSet = userSet.map { response =>
         (response.json \\ "user")
       }
-      return Await.result(futureUserSet, 1500 milliseconds).asInstanceOf[List[JsObject]]
+      return Await.result(futureUserSet, 2500 milliseconds).asInstanceOf[List[JsObject]]
     }
 
     def getRandomUser(): Future[Option[User]] = {
@@ -89,7 +89,10 @@ object Test extends Controller with MongoController{
       for (x <- 1 to quantity) {
         val randomSubject = generateRandomSubject(Random.nextInt(7)+1)
         val randomMessage = randomSubject + " " + generateRandomMessage(Random.nextInt(3)+1)
-        messages += Message(BSONObjectID.generate, randomSubject, getRandomUsername(), Seq(getRandomUserID(), getRandomUserID()), randomMessage)
+        val randomUser = Await.result(getRandomUser(), 1500 milliseconds).get
+        val randomUser2 = Await.result(getRandomUser(), 1500 milliseconds).get
+        val randomUser3 = Await.result(getRandomUser(), 1500 milliseconds).get
+        messages += Message(BSONObjectID.generate, randomSubject, randomUser, Seq(randomUser2, randomUser3), randomMessage)
       }
       val futureMessageResult = messages.map { message =>
         val messageJson = Json.toJson(message)
