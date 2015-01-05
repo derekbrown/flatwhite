@@ -6,6 +6,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.data.format.Formats._
 import models._
 import actions._
 import scala.concurrent.Future
@@ -19,7 +20,7 @@ object Users extends Controller with MongoController{
 
     def collection = db.collection[JSONCollection]("users")
 
- def list = WithCors("GET") {Action.async {
+    def list = WithCors("GET") {Action.async {
       val cursor: Cursor [User] = collection.find(Json.obj()).
         sort(Json.obj("_id" -> -1)).
         cursor[User]
@@ -31,6 +32,20 @@ object Users extends Controller with MongoController{
       }
 
     }}
+
+    def saveUser = Action(BodyParsers.parse.json) { request =>
+      val userResult = request.body.validate[User]
+      userResult.fold(
+        errors => {
+          BadRequest(Json.obj("status"->"Nope", "message"->JsError.toFlatJson(errors)))
+        },
+        user => {
+          collection.insert(user)
+        }
+      )
+
+      Ok(userResult.toString)
+    }
 
     def create(firstname: String, lastname: String, username: String, email: String) = Action.async {
       val json = Json.obj(
