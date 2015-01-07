@@ -34,6 +34,7 @@ object Users extends Controller with MongoController{
     }}
 
     def saveUser = Action(BodyParsers.parse.json) { request =>
+      // TODO: Fix Validation here with MongoDB BSONStringID
       val userResult = request.body.validate[User]
       userResult.fold(
         errors => {
@@ -45,34 +46,6 @@ object Users extends Controller with MongoController{
       )
 
       Ok(userResult.toString)
-    }
-
-    def create(firstname: String, lastname: String, username: String, email: String) = Action.async {
-      val json = Json.obj(
-        "_id" -> BSONObjectID.generate,
-        "firstname" -> firstname,
-        "lastname" -> lastname,
-        "username" -> username,
-        "email" -> email,
-        "created" -> new java.util.Date().getTime()
-      )
-
-      collection.insert(json).map(lastError => Ok("MongoDB Error: %s".format(lastError)))
-    }
-
-    def createTest = Action.async {
-      val testuser = User(BSONObjectID.generate, "Kelly","Boyd","SunshineKelly","kelly@kelly.com")
-      val futureResult = collection.insert(testuser)
-      futureResult.map(_=> Ok(testuser.toString))
-    }
-
-    def createFromJson = Action.async(parse.json) { request =>
-        request.body.validate[User].map { user =>
-        collection.insert(user).map { lastError =>
-          Logger.debug(s"Successfully inserted with LastError: $lastError")
-          Created
-        }
-      }.getOrElse(Future.successful(BadRequest("invalid json")))
     }
 
     def findByUsername(username: String) = Action.async {
