@@ -22,7 +22,7 @@ object Users extends Controller with MongoController{
 
     def list = WithCors("GET") {Action.async {
       val cursor: Cursor [User] = collection.find(Json.obj()).
-        sort(Json.obj("_id" -> -1)).
+        sort(Json.obj("lastName" -> 1)).
         cursor[User]
 
       val futureUserList = cursor.collect[List]()
@@ -33,19 +33,23 @@ object Users extends Controller with MongoController{
 
     }}
 
-    def saveUser = Action(BodyParsers.parse.json) { request =>
-      // TODO: Fix Validation here with MongoDB BSONStringID
-      val userResult = request.body.validate[User]
-      userResult.fold(
-        errors => {
-          BadRequest(Json.obj("status"->"Nope", "message"->JsError.toFlatJson(errors)))
-        },
-        user => {
-          collection.insert(user)
+    def saveUser = Action(parse.json) { request =>
+      val userJson = request.body.validate[User].map { user =>
+        collection.insert(user).map { lastError =>
+          Logger.debug(s"Successfully inserted with LastError: $lastError")
+          Created
         }
-      )
-
-      Ok(userResult.toString)
+      }
+      // }.getOrElse(Future.successful(BadRequest("Invalid JSON")))
+      // userResult.fold(
+      //   errors => {
+      //     BadRequest(Json.obj("status"->"Nope", "message"->JsError.toFlatJson(errors)))
+      //   },
+      //   user => {
+      //     collection.insert(user)
+      //   }
+      // )
+      Ok(userJson.toString)
     }
 
     def findByUsername(username: String) = Action.async {

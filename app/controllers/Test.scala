@@ -56,7 +56,7 @@ object Test extends Controller with MongoController{
       }
     }
 
-    def getRandomUserID(): BSONObjectID = {
+    def getRandomUserID(): Option[BSONObjectID] = {
       val rando = Await.result(getRandomUser(), 2500 milliseconds)
       val randomUser = rando.get
       return randomUser._id
@@ -72,7 +72,7 @@ object Test extends Controller with MongoController{
       val usersToGenerate = generateRandomUserData(quantity)
       val usersList = usersToGenerate.map { user =>
         val userJson = Json.toJson(user)
-        User(BSONObjectID.generate, (userJson \\ "first")(0).toString.replace("\"",""), (userJson \\ "last")(0).toString.replace("\"",""), (userJson \\ "username")(0).toString.replace("\"",""), (userJson \\ "email")(0).toString.replace("\"",""))
+        User(Some(BSONObjectID.generate), (userJson \\ "first")(0).toString.replace("\"",""), (userJson \\ "last")(0).toString.replace("\"",""), (userJson \\ "username")(0).toString.replace("\"",""), (userJson \\ "email")(0).toString.replace("\"",""))
       }
       val futureUsersResult = usersList.map { user =>
         val userJson = Json.toJson(user)
