@@ -9,8 +9,12 @@ import play.modules.reactivemongo.json.collection.JSONCollection
 
 object Platform extends Controller with MongoController{
 
-    def login = WithCors("GET", "POST") {Action {
-        Ok("Logged In");
+    def login = WithCors("POST") { Action {
+      Ok("Logged in.");
+    }}
+
+    def signup = WithCors("POST") { Action {
+      Ok("Signed up.");
     }}
 
 }

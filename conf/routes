@@ -6,8 +6,8 @@
 GET     /                                     controllers.Application.index()
 
 # Platform
-GET     /login                                controllers.Platform.login()
 POST    /login                                controllers.Platform.login()
+POST    /signup                               controllers.Platform.signup()
 
 # Users
 GET     /users                                controllers.Users.list()
