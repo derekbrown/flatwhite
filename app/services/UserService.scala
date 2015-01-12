@@ -1,5 +1,7 @@
 package services
 
+// import ExecutionContext.Implicits.global
+import models._
 import _root_.java.util.Date
 import securesocial.core._
 import play.api.Application
@@ -14,18 +16,31 @@ import play.api.mvc.Controller
 import play.modules.reactivemongo.json.collection.JSONCollection
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import reactivemongo.api._
+import reactivemongo.bson._
+import play.modules.reactivemongo.json.BSONFormats._
 import reactivemongo.core.commands.GetLastError
 import scala.util.parsing.json.JSONObject
 import org.joda.time.DateTime
 import org.joda.time.format.{DateTimeFormatter, DateTimeFormat}
+import play.api.libs.concurrent.Execution.Implicits._
 
 class UserService(application: Application) extends UserServicePlugin(application) with Controller with MongoController{
   def collection: JSONCollection = db.collection[JSONCollection]("users")
   def tokens: JSONCollection = db.collection[JSONCollection]("tokens")
 
   def findByEmailAndProvider(email: String, providerId: String): Option[Identity] = {
-    val cursor = collection.find(BSONDocument("email"->email, "provider"->providerId)).cursor[User]
+    val cursor: Cursor [User] = collection.find(BSONDocument("email"->email, "provider"->providerId)).cursor[User]
     Await.result(cursor.headOption, 3 seconds)
+  }
+
+  def save(user: Identity): Identity = {
+    user match {
+      case u: User => collection.save(u)
+      case i: Identity => collection.save(User.encodeIdentity(i))
+      case _ =>
+    }
+    user
   }
 
   def find(id: IdentityId): Option[Identity] = {
@@ -45,8 +60,8 @@ class UserService(application: Application) extends UserServicePlugin(applicatio
     BSONDocument(
       "uuid" -> token.uuid,
       "email" -> token.email,
-      "creation_time" -> BSONDateTime(token.creation_time.getMillis()),
-      "expiration_time" -> BSONDateTime(token.expiration_time.getMillis()),
+      "creation_time" -> BSONDateTime(token.creationTime.getMillis()),
+      "expiration_time" -> BSONDateTime(token.expirationTime.getMillis()),
       "isSignUp" -> token.isSignUp
     )
 
@@ -54,7 +69,7 @@ class UserService(application: Application) extends UserServicePlugin(applicatio
     tokens.save(serializeToken(token))
   }
 
-  def findToken(token: String): Option[Token] = {
+  def findToken(uuid: String): Option[Token] = {
     val cursor = tokens.find(BSONDocument("uuid"->uuid)).cursor[BSONDocument]
     Await.result(cursor.headOption, 3 seconds).map {
       d:BSONDocument => deserializeToken(d)
