@@ -13,7 +13,6 @@ case class User(
   fullName: String,
   userName: String,
   email: Option[String],
-
   avatarUrl: Option[String],
   authMethod: AuthenticationMethod,
   oAuth1Info: Option[OAuth1Info] = None,
@@ -43,9 +42,10 @@ object User {
         doc.getAs[String]("firstName").get,
         doc.getAs[String]("lastname").get,
         doc.getAs[String]("fullName").get,
-        doc.getAs[String]("email").get,
+        doc.getAs[String]("userName").get,
+        doc.getAs[String]("email"),
         doc.getAs[String]("avatarUrl"),
-        new AuthenticationMethod(doc.getAs[String]("authmethod")),
+        new AuthenticationMethod(doc.getAs[String]("authmethod").getOrElse("")),
         doc.getAs[BSONDocument]("oauth1") map { oAuth1Info =>
           new OAuth1Info(
             oAuth1Info.getAs[String]("token").get,
@@ -68,7 +68,7 @@ object User {
           )
         },
         doc.getAs[String]("id"),
-        doc.getAs[BSONObjectID]("_id").get
+        doc.getAs[BSONObjectID]("_id")
       )
   }
 
