@@ -6,11 +6,9 @@ import play.modules.reactivemongo.json.BSONFormats._
 import securesocial.core.{Identity,IdentityId,AuthenticationMethod, OAuth1Info, OAuth2Info, PasswordInfo}
 
 case class User(
-  // _id: Option[BSONObjectID] = Some(BSONObjectID.generate),
   identityId: IdentityId,
   firstName: String,
   lastName: String,
-  fullName: String,
   userName: String,
   email: Option[String],
   avatarUrl: Option[String],
@@ -41,7 +39,6 @@ object User {
         new IdentityId(doc.getAs[String]("userid").get, doc.getAs[String]("provider").get),
         doc.getAs[String]("firstName").get,
         doc.getAs[String]("lastname").get,
-        doc.getAs[String]("fullName").get,
         doc.getAs[String]("userName").get,
         doc.getAs[String]("email"),
         doc.getAs[String]("avatarUrl"),
@@ -98,12 +95,9 @@ object User {
   )
 
   implicit object UserBSONWriter extends BSONDocumentWriter[User] {
-    def write(user: User) : BSONDocument =
-      User.encodeIdentity(user) ++ BSONDocument(
-        "fullName" -> user.firstName + " " + user.lastName
-      )
+    def write(user: User) : BSONDocument = User.encodeIdentity(user)
   }
 
-  // implicit val userJSONReads = fromOidField("_id", "id") andThen Json.reads[User]
-  // implicit val userJSONWrites = Json.writes[User]
+  implicit val userJSONReads = fromOidField("_id", "id") andThen Json.reads[User]
+  implicit val userJSONWrites = Json.writes[User]
 }
