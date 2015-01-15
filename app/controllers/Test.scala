@@ -69,21 +69,21 @@ object Test extends Controller with MongoController{
     }
 
     def createUsers(quantity: Int) = Action {
-      val usersToGenerate = generateRandomUserData(quantity)
-      val usersList = usersToGenerate.map { user =>
-        val userJson = Json.toJson(user)
-        val firstName = (userJson \\ "first")(0).toString.replace("\"","")
-        val lastName = (userJson \\ "last")(0).toString.replace("\"","")
-        User(Some(BSONObjectID.generate), firstName, lastName, firstName + ' ' + lastName, (userJson \\ "username")(0).toString.replace("\"",""), (userJson \\ "email")(0).toString.replace("\"",""))
-      }
-      val futureUsersResult = usersList.map { user =>
-        val userJson = Json.toJson(user)
-        val futureUserResult = usersCollection.insert(userJson).map { lastError =>
-          Logger.debug(s"Successfully inserted with LastError: $lastError")
-          Created
-        }
-      }
-      Ok(Json.obj("users" -> usersList))
+      // val usersToGenerate = generateRandomUserData(quantity)
+      // val usersList = usersToGenerate.map { user =>
+      //   val userJson = Json.toJson(user)
+      //   val firstName = (userJson \\ "first")(0).toString.replace("\"","")
+      //   val lastName = (userJson \\ "last")(0).toString.replace("\"","")
+      //   User(Some(BSONObjectID.generate), firstName, lastName, firstName + ' ' + lastName, (userJson \\ "username")(0).toString.replace("\"",""), (userJson \\ "email")(0).toString.replace("\"",""))
+      // }
+      // val futureUsersResult = usersList.map { user =>
+      //   val userJson = Json.toJson(user)
+      //   val futureUserResult = usersCollection.insert(userJson).map { lastError =>
+      //     Logger.debug(s"Successfully inserted with LastError: $lastError")
+      //     Created
+      //   }
+      // }
+      Ok(Json.obj("users" -> "usersList"))
     }
 
     def createMessages(quantity: Int) = Action {

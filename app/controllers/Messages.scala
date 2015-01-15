@@ -13,13 +13,14 @@ import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection.JSONCollection
 import reactivemongo.bson._
 import play.modules.reactivemongo.json.BSONFormats._
+import securesocial.core._
 
-object Messages extends Controller with MongoController{
+object Messages extends Controller with MongoController with SecureSocial{
 
     def messagesCollection = db.collection[JSONCollection]("messages")
     def usersCollection = db.collection[JSONCollection]("users")
 
-    def list = WithCors("GET") {Action.async {
+    def list = WithCors("GET") { SecuredAction.async {
       val cursor: Cursor [Message] = messagesCollection.find(Json.obj()).
         sort(Json.obj("_id" -> -1)).
         cursor[Message]
