@@ -2,12 +2,17 @@ name := "flatwhite"
 
 version := "1.0-SNAPSHOT"
 
+scalaVersion := "2.11.1"
+
+resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
+
 libraryDependencies ++= Seq(
   javaJdbc,
   javaEbean,
   cache,
-  "org.reactivemongo" %% "play2-reactivemongo" % "0.10.5.0.akka22",
-"ws.securesocial" %% "securesocial" % "2.1.4"
+  ws,
+  "org.reactivemongo" %% "play2-reactivemongo" % "0.11.0-SNAPSHOT",
+  "ws.securesocial" %% "securesocial" % "master-SNAPSHOT"
 )
 
-play.Project.playScalaSettings
+lazy val root = (project in file(".")).enablePlugins(PlayScala)

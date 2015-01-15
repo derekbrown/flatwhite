@@ -7,6 +7,7 @@ import play.api.libs.json._
 import play.api.data.Form
 import models._
 import actions._
+import services._
 import scala.concurrent.Future
 import reactivemongo.api._
 import play.modules.reactivemongo.MongoController
@@ -15,12 +16,13 @@ import reactivemongo.bson._
 import play.modules.reactivemongo.json.BSONFormats._
 import securesocial.core._
 
+
 object Messages extends Controller with MongoController with SecureSocial{
 
     def messagesCollection = db.collection[JSONCollection]("messages")
     def usersCollection = db.collection[JSONCollection]("users")
 
-    def list = WithCors("GET") { SecuredAction.async {
+    def list = WithCors("GET") { SecuredAction(ajaxCall=true).async {
       val cursor: Cursor [Message] = messagesCollection.find(Json.obj()).
         sort(Json.obj("_id" -> -1)).
         cursor[Message]

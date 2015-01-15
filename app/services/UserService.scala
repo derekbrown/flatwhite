@@ -1,6 +1,5 @@
 package services
 
-// import ExecutionContext.Implicits.global
 import models._
 import _root_.java.util.Date
 import securesocial.core._
