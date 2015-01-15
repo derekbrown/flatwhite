@@ -72,7 +72,9 @@ object Test extends Controller with MongoController{
       val usersToGenerate = generateRandomUserData(quantity)
       val usersList = usersToGenerate.map { user =>
         val userJson = Json.toJson(user)
-        User(Some(BSONObjectID.generate), (userJson \\ "first")(0).toString.replace("\"",""), (userJson \\ "last")(0).toString.replace("\"",""), (userJson \\ "username")(0).toString.replace("\"",""), (userJson \\ "email")(0).toString.replace("\"",""))
+        val firstName = (userJson \\ "first")(0).toString.replace("\"","")
+        val lastName = (userJson \\ "last")(0).toString.replace("\"","")
+        User(Some(BSONObjectID.generate), firstName, lastName, firstName + ' ' + lastName, (userJson \\ "username")(0).toString.replace("\"",""), (userJson \\ "email")(0).toString.replace("\"",""))
       }
       val futureUsersResult = usersList.map { user =>
         val userJson = Json.toJson(user)

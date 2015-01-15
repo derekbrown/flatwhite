@@ -9,9 +9,10 @@ case class User(
   identityId: IdentityId,
   firstName: String,
   lastName: String,
+  fullName: String,
   userName: String,
-  email: Option[String],
-  avatarUrl: Option[String],
+  email: Option[String] = None,
+  avatarUrl: Option[String] = None,
   authMethod: AuthenticationMethod,
   oAuth1Info: Option[OAuth1Info] = None,
   oAuth2Info: Option[OAuth2Info] = None,
@@ -39,6 +40,7 @@ object User {
         new IdentityId(doc.getAs[String]("userid").get, doc.getAs[String]("provider").get),
         doc.getAs[String]("firstName").get,
         doc.getAs[String]("lastname").get,
+        doc.getAs[String]("fullName").get,
         doc.getAs[String]("userName").get,
         doc.getAs[String]("email"),
         doc.getAs[String]("avatarUrl"),
@@ -74,6 +76,7 @@ object User {
     "provider" -> id.identityId.providerId,
     "firstname" -> id.firstName,
     "lastname" -> id.lastName,
+    "fullname" -> BSONString(id.firstName + " " + id.lastName),
     "email" -> id.email,
     "avatar" -> id.avatarUrl,
     "authmethod" -> id.authMethod.method,
@@ -98,6 +101,17 @@ object User {
     def write(user: User) : BSONDocument = User.encodeIdentity(user)
   }
 
+  implicit val identityJSONReads = Json.reads[IdentityId]
+  implicit val authJSONReads = Json.reads[AuthenticationMethod]
+  implicit val oauth1JSONReads = Json.reads[OAuth1Info]
+  implicit val oauth2JSONReads = Json.reads[OAuth2Info]
+  implicit val passwordJSONReads = Json.reads[PasswordInfo]
   implicit val userJSONReads = fromOidField("_id", "id") andThen Json.reads[User]
+
+  implicit val identityJSONWrites = Json.writes[IdentityId]
+  implicit val authJSONWrites = Json.writes[AuthenticationMethod]
+  implicit val oauth1JSONWrites = Json.writes[OAuth1Info]
+  implicit val oauth2JSONWrites = Json.writes[OAuth2Info]
+  implicit val passwordJSONWrites = Json.writes[PasswordInfo]
   implicit val userJSONWrites = Json.writes[User]
 }
