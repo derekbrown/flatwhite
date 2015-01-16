@@ -10,6 +10,7 @@ import play.api.libs.json.Reads._
 import play.api.libs.json.Writes._
 import securesocial.core.IdentityId
 import securesocial.core.providers.Token
+import securesocial.core.services.UserService
 import play.modules.reactivemongo.MongoController
 import play.api.mvc.Controller
 import play.modules.reactivemongo.json.collection.JSONCollection
@@ -24,7 +25,7 @@ import org.joda.time.DateTime
 import org.joda.time.format.{DateTimeFormatter, DateTimeFormat}
 import play.api.libs.concurrent.Execution.Implicits._
 
-class UserService(application: Application) extends UserServicePlugin(application) with Controller with MongoController{
+class KnotisUserService(application: Application) extends UserService[User] with Controller with MongoController{
   def collection: JSONCollection = db.collection[JSONCollection]("users")
   def tokens: JSONCollection = db.collection[JSONCollection]("tokens")
 

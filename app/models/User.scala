@@ -3,7 +3,7 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import reactivemongo.bson._
 import play.modules.reactivemongo.json.BSONFormats._
-import securesocial.core.{Identity,IdentityId,AuthenticationMethod, OAuth1Info, OAuth2Info, PasswordInfo}
+import securesocial.core.{Identity, IdentityId ,AuthenticationMethod, OAuth1Info, OAuth2Info, PasswordInfo}
 
 case class User(
   identityId: IdentityId,

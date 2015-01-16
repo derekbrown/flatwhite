@@ -17,7 +17,7 @@ import play.modules.reactivemongo.json.BSONFormats._
 import securesocial.core._
 
 
-object Messages extends Controller with MongoController with SecureSocial{
+object Messages extends Controller with MongoController with SecureSocial[User]{
 
     def messagesCollection = db.collection[JSONCollection]("messages")
     def usersCollection = db.collection[JSONCollection]("users")

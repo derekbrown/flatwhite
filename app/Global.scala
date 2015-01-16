@@ -1,8 +1,14 @@
 package common
 
+import models._
 import play.api._
-import services.UserService
+import securesocial.core.RuntimeEnvironment
+import services.KnotisUserService
 
 object Global extends play.api.GlobalSettings {
-  lazy val userService: UserService = new UserService(play.api.Play.current)
+
+  object KnotisRuntimeEnvironment extends RuntimeEnvironment.Default[User] {
+    lazy val userService: KnotisUserService = new KnotisUserService(play.api.Play.current)
+  }
+
 }
