@@ -22,7 +22,7 @@ object Messages extends Controller with MongoController with SecureSocial[User]{
     def messagesCollection = db.collection[JSONCollection]("messages")
     def usersCollection = db.collection[JSONCollection]("users")
 
-    def list = WithCors("GET") { SecuredAction(ajaxCall=true).async {
+    def list = WithCors("GET") { SecuredAction.async {
       val cursor: Cursor [Message] = messagesCollection.find(Json.obj()).
         sort(Json.obj("_id" -> -1)).
         cursor[Message]

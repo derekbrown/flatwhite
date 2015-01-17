@@ -5,6 +5,7 @@ import play.api.mvc._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.libs.json.Reads._
+import play.api.Play.current
 import play.api.data.Form
 import play.api.libs.ws.WS
 import play.api.libs.functional.syntax._
@@ -65,7 +66,7 @@ object Test extends Controller with MongoController{
     def getRandomUsername(): String = {
       val rando = Await.result(getRandomUser(), 2500 milliseconds)
       val randomUser = rando.get
-      return randomUser.userName
+      return randomUser.userName.get
     }
 
     def createUsers(quantity: Int) = Action {
