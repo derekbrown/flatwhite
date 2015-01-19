@@ -17,7 +17,7 @@ import play.modules.reactivemongo.json.BSONFormats._
 import securesocial.core._
 
 
-object Messages extends Controller with MongoController with SecureSocial[User]{
+class Messages(override implicit val env: RuntimeEnvironment[User]) extends Controller with MongoController with SecureSocial[User]{
 
     def messagesCollection = db.collection[JSONCollection]("messages")
     def usersCollection = db.collection[JSONCollection]("users")

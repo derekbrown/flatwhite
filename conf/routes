@@ -3,32 +3,27 @@
 # ~~~~
 
 # Home page
-GET     /                                     controllers.Application.index()
+GET     /                                     @controllers.Application.index
 
 # Platform
 # POST    /login                                controllers.Platform.login()
 # POST    /signup                               controllers.Platform.signup()
 
 # Login
-GET     /login                                securesocial.controllers.LoginPage.login
-GET     /logout                               securesocial.controllers.LoginPage.logout
+GET     /login                                @securesocial.controllers.LoginPage.login
+GET     /logout                               @securesocial.controllers.LoginPage.logout
 
 # Registration
-GET     /signup                               securesocial.controllers.Registration.startSignUp
-POST    /signup                               securesocial.controllers.Registration.handleStartSignUp
-GET     /signup/:token                        securesocial.controllers.Registration.signUp(token)
-POST    /signup/:token                        securesocial.controllers.Registration.handleSignUp(token)
-GET     /reset                                securesocial.controllers.Registration.startResetPassword
-POST    /reset                                securesocial.controllers.Registration.handleStartResetPassword
-GET     /reset/:token                         securesocial.controllers.Registration.resetPassword(token)
-POST    /reset/:token                         securesocial.controllers.Registration.handleResetPassword(token)
-GET     /password                             securesocial.controllers.PasswordChange.page
-POST    /password                             securesocial.controllers.PasswordChange.handlePasswordChange
+GET     /signup                               @securesocial.controllers.Registration.startSignUp
+POST    /signup                               @securesocial.controllers.Registration.handleStartSignUp
+GET     /signup/:token                        @securesocial.controllers.Registration.signUp(token)
+POST    /signup/:token                        @securesocial.controllers.Registration.handleSignUp(token)
+GET     /password                             @securesocial.controllers.PasswordChange.page
+POST    /password                             @securesocial.controllers.PasswordChange.handlePasswordChange
 
 # Provider Entry-Points
-GET     /authenticate/:provider               securesocial.controllers.ProviderController.authenticate(provider)
-POST    /authenticate/:provider               securesocial.controllers.ProviderController.authenticateByPost(provider)
-GET     /not-authorized                       securesocial.controllers.ProviderController.notAuthorized
+GET     /authenticate/:provider               @securesocial.controllers.ProviderController.authenticate(provider)
+POST    /authenticate/:provider               @securesocial.controllers.ProviderController.authenticateByPost(provider)
 
 # Users
 GET     /users                                controllers.Users.list()
@@ -36,12 +31,12 @@ POST    /users                                controllers.Users.saveUser()
 GET     /users/:username                      controllers.Users.findByUsername(username)
 
 # Messages
-GET     /messages                             controllers.Messages.list()
-POST    /messages                             controllers.Messages.send()
+GET     /messages                             @controllers.Messages.list()
+POST    /messages                             @controllers.Messages.send()
 
 # Convert the following (or add additional routes?) to traditional GET request routes
-GET     /messages/from/:sender                controllers.Messages.getBySender(sender)
-GET     /messages/with/:participant           controllers.Messages.getByParticipant(participant)
+GET     /messages/from/:sender                @controllers.Messages.getBySender(sender)
+GET     /messages/with/:participant           @controllers.Messages.getByParticipant(participant)
 
 # Managing Test Data
 GET     /test/create/users/:quantity          controllers.Test.createUsers(quantity: Int)

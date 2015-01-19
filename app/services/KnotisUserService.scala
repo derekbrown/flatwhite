@@ -37,8 +37,8 @@ class KnotisUserService(application: Application) extends UserService[User] with
     result
   }
 
-  def find(id: BasicProfile): Future[Option[BasicProfile]] = {
-    findByEmailAndProvider(id.userId, id.providerId)
+  def find(userId: String, providerId: String): Future[Option[BasicProfile]] = {
+    findByEmailAndProvider(userId, providerId)
   }
 
   def save(user: BasicProfile, mode: SaveMode): Future[User] = {
@@ -58,24 +58,32 @@ class KnotisUserService(application: Application) extends UserService[User] with
   }
 
   def saveToken(token: MailToken): Future[MailToken] = {
+    val newToken = Token(token)
     Future.successful {
-      tokens.insert(token)
+      tokens.insert(newToken)
       token
     }
   }
 
-  def findToken(token: String): Future[Option[MailToken]] = {
-    val cursor = tokens.find(BSONDocument("uuid" -> token)).cursor[BSONDocument]
+  def findToken(uuid: String): Future[Option[MailToken]] = {
+    val cursor: Cursor [Token] = tokens.find(BSONDocument("mailToken.uuid" -> uuid)).cursor[Token]
     val result = for (token <- cursor.headOption) yield {
-      token
+      Some(token.get.mailToken)
     }
     result
   }
 
   def deleteToken(uuid: String): Future[Option[MailToken]] = {
-    Future.successful {
-      tokens.remove(BSONDocument("uuid"->uuid))
+    val cursor: Cursor [Token] = tokens.find(BSONDocument("mailToken.uuid" -> uuid)).cursor[Token]
+    val result = for (token <- cursor.headOption) yield {
+      token match {
+        case Some(token) =>
+          tokens.remove(BSONDocument("mailToken.uuid" -> uuid))
+          Some(token.mailToken)
+        case None => None
+      }
     }
+    result
   }
 
   def deleteExpiredTokens() {
@@ -85,19 +93,45 @@ class KnotisUserService(application: Application) extends UserService[User] with
 
   def deserializeToken(doc: BSONDocument): Token =
     Token(
-      doc.getAs[String]("uuid").get,
-      doc.getAs[String]("email").get,
-      new DateTime(doc.getAs[BSONDateTime]("creation_time").get.value),
-      new DateTime(doc.getAs[BSONDateTime]("expiration_time").get.value),
-      doc.getAs[Boolean]("isSignUp").get
+      new MailToken(
+        doc.getAs[String]("uuid").get,
+        doc.getAs[String]("email").get,
+        new DateTime(doc.getAs[BSONDateTime]("creation_time").get.value),
+        new DateTime(doc.getAs[BSONDateTime]("expiration_time").get.value),
+        doc.getAs[Boolean]("isSignUp").get
+      )
     )
 
   def serializeToken(token: Token): BSONDocument =
     BSONDocument(
-      "uuid" -> token.uuid,
-      "email" -> token.email,
-      "creation_time" -> BSONDateTime(token.creationTime.getMillis()),
-      "expiration_time" -> BSONDateTime(token.expirationTime.getMillis()),
-      "isSignUp" -> token.isSignUp
+      "uuid" -> token.mailToken.uuid,
+      "email" -> token.mailToken.email,
+      "creation_time" -> BSONDateTime(token.mailToken.creationTime.getMillis()),
+      "expiration_time" -> BSONDateTime(token.mailToken.expirationTime.getMillis()),
+      "isSignUp" -> token.mailToken.isSignUp
     )
+
+  def link(current: User, to: BasicProfile): Future[User] = {
+    Future.successful {
+      current
+    }
+  }
+
+  override def updatePasswordInfo(user: User, info: PasswordInfo): Future[Option[BasicProfile]] = {
+    val found = users.find(BSONDocument("email"->user.profile.email, "provider"->user.profile.providerId)).cursor[User]
+    val result = for (user <- found.headOption) yield {
+    // Update MongoDB User Entry with info
+    }
+    Future.successful {
+      Some(user.profile)
+    }
+  }
+
+  override def passwordInfoFor(user: User): Future[Option[PasswordInfo]] = {
+    val found = users.find(BSONDocument("email"->user.profile.email, "provider"->user.profile.providerId)).cursor[User]
+    val result = for (user <- found.headOption) yield {
+      user.get.profile.passwordInfo
+    }
+    result
+  }
 }
