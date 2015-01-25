@@ -14,6 +14,10 @@ GET     /signup                               @securesocial.controllers.Registra
 POST    /signup                               @securesocial.controllers.Registration.handleStartSignUp
 GET     /signup/:token                        @securesocial.controllers.Registration.signUp(token)
 POST    /signup/:token                        @securesocial.controllers.Registration.handleSignUp(token)
+GET     /reset                                @securesocial.controllers.PasswordReset.startResetPassword
+POST    /reset                                @securesocial.controllers.PasswordReset.handleStartResetPassword
+GET     /reset/:token                         @securesocial.controllers.PasswordReset.resetPassword(token)
+POST    /reset/:token                         @securesocial.controllers.PasswordReset.handleResetPassword(token)
 GET     /password                             @securesocial.controllers.PasswordChange.page
 POST    /password                             @securesocial.controllers.PasswordChange.handlePasswordChange
 
