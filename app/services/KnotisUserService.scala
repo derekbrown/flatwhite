@@ -26,19 +26,30 @@ import org.joda.time.format.{DateTimeFormatter, DateTimeFormat}
 import play.api.libs.concurrent.Execution.Implicits._
 
 class KnotisUserService(application: Application) extends UserService[User] with Controller with MongoController{
+  val logger = Logger("application.controllers.KnotisUserService")
   def users: JSONCollection = db.collection[JSONCollection]("users")
   def tokens: JSONCollection = db.collection[JSONCollection]("tokens")
 
   def findByEmailAndProvider(email: String, providerId: String): Future[Option[BasicProfile]] = {
     val cursor: Cursor [User] = users.find(BSONDocument("email"->email, "provider"->providerId)).cursor[User]
     val result = for (user <- cursor.headOption) yield {
-      Some(user.get.profile)
+      user match {
+        case Some(user) => Some(user.profile)
+        case None => None
+      }
     }
     result
   }
 
   def find(userId: String, providerId: String): Future[Option[BasicProfile]] = {
-    findByEmailAndProvider(userId, providerId)
+    val cursor: Cursor [User] = users.find(BSONDocument("profile.userId"->userId, "profile.providerId"->providerId)).cursor[User]
+    val result = for (user <- cursor.headOption) yield {
+      user match {
+        case Some(user) => Some(user.profile)
+        case None => None
+      }
+    }
+    result
   }
 
   def save(user: BasicProfile, mode: SaveMode): Future[User] = {
