@@ -5,10 +5,6 @@
 # Home page
 GET     /                                     @controllers.Application.index
 
-# Platform
-# POST    /login                                controllers.Platform.login()
-# POST    /signup                               controllers.Platform.signup()
-
 # Login
 GET     /login                                @securesocial.controllers.LoginPage.login
 GET     /logout                               @securesocial.controllers.LoginPage.logout
