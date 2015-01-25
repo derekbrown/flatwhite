@@ -56,8 +56,9 @@ class KnotisUserService(application: Application) extends UserService[User] with
     mode match {
       case SaveMode.SignUp =>
         val newUser = User(user)
-        users.insert(newUser).map { lastError =>
-          Logger.debug(s"Successfully inserted with LastError: $lastError")
+        val userJson = Json.toJson(newUser)
+        users.insert(userJson).map { lastError =>
+          Logger.debug(s"Save (New User) - Successfully inserted with LastError: $lastError")
           newUser
         }
       case SaveMode.LoggedIn =>
@@ -79,7 +80,10 @@ class KnotisUserService(application: Application) extends UserService[User] with
   def findToken(uuid: String): Future[Option[MailToken]] = {
     val cursor: Cursor [Token] = tokens.find(BSONDocument("mailToken.uuid" -> uuid)).cursor[Token]
     val result = for (token <- cursor.headOption) yield {
-      Some(token.get.mailToken)
+      token match {
+        case Some(token) => Some(token.mailToken)
+        case None => None
+      }
     }
     result
   }
