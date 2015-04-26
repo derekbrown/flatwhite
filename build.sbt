@@ -13,6 +13,5 @@ libraryDependencies ++= Seq(
   anorm,
   cache,
   ws,
-  "org.reactivemongo" %% "play2-reactivemongo" % "0.10.5.0.akka23",
-  "ws.securesocial" %% "securesocial" % "master-SNAPSHOT"
+  "mysql" % "mysql-connector-java" % "5.6.22"
 )
